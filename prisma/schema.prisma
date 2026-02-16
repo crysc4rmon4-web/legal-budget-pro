@@ -1,0 +1,26 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-node"
+}
+
+model Budget {
+  id              String   @id @default(cuid())
+  budgetNumber    String   @unique 
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  clientName      String
+  clientNIF       String
+  clientEmail     String
+  
+  subtotal        Float
+  taxAmount       Float    
+  total           Float
+  
+  status          String   @default("DRAFT") 
+  fingerprint     String?  
+}

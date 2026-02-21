@@ -4,7 +4,7 @@ import { Cpu } from "lucide-react"; // Icono moderno
  * Navbar Component - "Boutique Experience"
  * Argumento Senior: Usamos sticky y backdrop-blur para dar sensación de App Nativa.
  */
-export const Navbar = () => {
+export default function Navbar() {
   return (
     <nav className="border-b bg-white/70 backdrop-blur-xl sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -26,4 +26,4 @@ export const Navbar = () => {
       </div>
     </nav>
   );
-};
+}

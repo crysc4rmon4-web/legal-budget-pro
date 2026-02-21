@@ -9,7 +9,6 @@ import { z } from "zod";
 // El Regex definitivo para España: NIF, NIE y CIF
 const spanishIdRegex = /^[0-9]{8}[TRWAGMYFPDXBNJZSQVHLCKE]$|^[XYZ][0-9]{7}[TRWAGMYFPDXBNJZSQVHLCKE]$|^[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]$/i;
 
-
 // Validación de los datos del cliente
 export const clientSchema = z.object({
   name: z.string().min(2, "El nombre o razón social es obligatorio"),
@@ -18,8 +17,6 @@ export const clientSchema = z.object({
   address: z.string().min(5, "La dirección fiscal es obligatoria para la validez legal"),
   phone: z.string().optional(),
 });
-
-export type ClientInput = z.infer<typeof clientSchema>;
 
 // Validación de cada línea del presupuesto
 export const budgetLineSchema = z.object({
@@ -43,6 +40,7 @@ export const budgetSchema = z.object({
 });
 
 // Tipos TypeScript extraídos de los esquemas (para usarlos en toda la app)
+// Agrupados al final para mantener el código limpio y evitar duplicados
 export type ClientInput = z.infer<typeof clientSchema>;
 export type BudgetLineInput = z.infer<typeof budgetLineSchema>;
 export type BudgetInput = z.infer<typeof budgetSchema>;

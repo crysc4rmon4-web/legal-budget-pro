@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma"; // Asegúrate de tener este archivo creado (lo haremos ahora)
-import { clientSchema, ClientInput } from "@/lib/validations/budget.ts";
+import { clientSchema, ClientInput } from "@/lib/validations/budget";
 import { revalidatePath } from "next/cache";
 
 /**

@@ -6,14 +6,20 @@ import { z } from "zod";
  * Si un dato no pasa por aquí, no entra a la base de datos.
  */
 
+// El Regex definitivo para España: NIF, NIE y CIF
+const spanishIdRegex = /^[0-9]{8}[TRWAGMYFPDXBNJZSQVHLCKE]$|^[XYZ][0-9]{7}[TRWAGMYFPDXBNJZSQVHLCKE]$|^[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]$/i;
+
+
 // Validación de los datos del cliente
 export const clientSchema = z.object({
-  name: z.string().min(2, "El nombre es demasiado corto"),
-  nif: z.string().regex(/^[a-zA-Z0-9]{9}$/, "NIF/CIF español inválido"),
-  email: z.string().email("Email no válido"),
-  address: z.string().min(5, "La dirección debe ser más completa"),
+  name: z.string().min(2, "El nombre o razón social es obligatorio"),
+  nif: z.string().toUpperCase().regex(spanishIdRegex, "El NIF/NIE/CIF no tiene un formato válido en España"),
+  email: z.string().email("El correo electrónico no es válido"),
+  address: z.string().min(5, "La dirección fiscal es obligatoria para la validez legal"),
   phone: z.string().optional(),
 });
+
+export type ClientInput = z.infer<typeof clientSchema>;
 
 // Validación de cada línea del presupuesto
 export const budgetLineSchema = z.object({

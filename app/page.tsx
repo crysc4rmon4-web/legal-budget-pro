@@ -1,11 +1,26 @@
-export default function Home() {
+export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold tracking-tight">Carmona Studio</h1>
-      <p className="mt-4 text-gray-500">Sistema de Presupuestos Legales 2026</p>
-      <div className="mt-8 p-4 border rounded-lg bg-green-50 text-green-700">
-        Ambiente configurado correctamente ✓
+    <div className="space-y-6">
+      <header>
+        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Dashboard</h1>
+        <p className="text-zinc-500">Bienvenido al control financiero de Carmona Studio.</p>
+      </header>
+
+      {/* Grid de métricas - Lo llenaremos en el siguiente paso */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="p-6 bg-white border border-zinc-200 rounded-xl shadow-sm">
+          <p className="text-sm font-medium text-zinc-500">Facturación Mes</p>
+          <p className="text-2xl font-bold">€0,00</p>
+        </div>
+        <div className="p-6 bg-white border border-zinc-200 rounded-xl shadow-sm">
+          <p className="text-sm font-medium text-zinc-500">IVA a Liquidar</p>
+          <p className="text-2xl font-bold text-blue-600">€0,00</p>
+        </div>
+        <div className="p-6 bg-white border border-zinc-200 rounded-xl shadow-sm">
+          <p className="text-sm font-medium text-zinc-500">Presupuestos Activos</p>
+          <p className="text-2xl font-bold">0</p>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

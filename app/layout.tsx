@@ -1,25 +1,35 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 
-const geistSans = Geist({ subsets: ["latin"] });
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
-  title: "Carmona Studio | Legal Budgeting",
-  description: "Next-gen budgeting compliant with Spanish 2026 laws",
+  title: "Legal Budget Pro | Carmona Studio",
+  description: "Gestión profesional de presupuestos legales",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="es">
-      <body className={`${geistSans.className} antialiased bg-slate-50 min-h-screen flex flex-col`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-50 text-zinc-950`}>
         <Navbar />
-        <main className="flex-grow max-w-7xl mx-auto w-full px-4 py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {children}
-        </main>
-        <Footer />
+        </div>
       </body>
     </html>
   );

@@ -1,26 +1,113 @@
+// -----------------------------------------------------------------------------
+// MOTOR DE BASE DE DATOS - CARMONA STUDIO
+// Arquitectura optimizada para cumplimiento normativo (Ley Antifraude España)
+// -----------------------------------------------------------------------------
+
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite" // Cambiado de postgresql a sqlite para desarrollo local
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-node"
+// -----------------------------------------------------------------------------
+// 1. CONFIGURACIÓN DE LA AGENCIA / FREELANCE (El dueño de la app)
+// -----------------------------------------------------------------------------
+model Company {
+  id            String   @id @default(cuid())
+  name          String   // Razón Social
+  nif           String   @unique // CIF/NIF validado
+  address       String   // Domicilio Fiscal (Obligatorio en facturas)
+  email         String
+  phone         String?
+  
+  // Relación: Una empresa emite muchos presupuestos
+  budgets       Budget[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
+// -----------------------------------------------------------------------------
+// 2. MINI-CRM (Los clientes a los que se les emite el presupuesto)
+// -----------------------------------------------------------------------------
+model Client {
+  id            String   @id @default(cuid())
+  name          String   // Nombre o Razón Social del cliente
+  nif           String   @unique // CIF/NIF
+  email         String
+  address       String   // Domicilio del cliente
+  phone         String?
+  
+  // Relación: Un cliente tiene muchos presupuestos
+  budgets       Budget[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// -----------------------------------------------------------------------------
+// 3. DOCUMENTO PRINCIPAL (Presupuesto / Factura Proforma)
+// -----------------------------------------------------------------------------
 model Budget {
   id              String   @id @default(cuid())
-  budgetNumber    String   @unique 
+  series          String   @default("PRE") // Ej: PRE-2026
+  budgetNumber    Int      // Numeración secuencial (Ej: 1, 2, 3...)
+  
+  // Claves foráneas (Relaciones)
+  companyId       String
+  clientId        String
+  company         Company  @relation(fields: [companyId], references: [id])
+  client          Client   @relation(fields: [clientId], references: [id])
+
+  // Desglose financiero
+  subtotal        Float    // Base imponible
+  taxAmount       Float    // Total de impuestos (IVA)
+  total           Float    // Total a pagar
+  
+  // Estado del documento
+  status          String   @default("DRAFT") // DRAFT, SENT, ACCEPTED, REJECTED
+  
+  // ---------------------------------------------------------
+  // CORE LEGAL ESPAÑA (Trazabilidad Ley Antifraude / Verifactu)
+  // ---------------------------------------------------------
+  issueDate       DateTime @default(now()) // Fecha de expedición
+  hash            String?  @unique // Huella digital del documento actual
+  previousHash    String?  // Huella del documento anterior (Encadenamiento)
+  isVerifactuSync Boolean  @default(false) // ¿Comunicado a Hacienda?
+  // ---------------------------------------------------------
+
+  // Relación: Un presupuesto tiene muchas líneas de concepto
+  lines           BudgetLine[]
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  // Evitar números duplicados en la misma serie (Ej: no pueden haber dos PRE-1)
+  @@unique([series, budgetNumber])
+}
+
+// -----------------------------------------------------------------------------
+// 4. LÍNEAS DE CONCEPTO (El desglose interno del presupuesto)
+// -----------------------------------------------------------------------------
+model BudgetLine {
+  id              String   @id @default(cuid())
   
-  clientName      String
-  clientNIF       String
-  clientEmail     String
+  // Relación con el presupuesto padre
+  budgetId        String
+  budget          Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  // Datos de la línea
+  concept         String   // Ej: "Diseño de Landing Page"
+  quantity        Float    @default(1)
+  unitPrice       Float    // Precio sin IVA
+  taxRate         Float    // Porcentaje de IVA aplicado (Ej: 21, 10, 4, 0)
   
-  subtotal        Float
-  taxAmount       Float    
-  total           Float
+  // Totales de la línea (calculados y guardados para evitar discrepancias futuras)
+  lineTotal       Float    // quantity * unitPrice
   
-  status          String   @default("DRAFT") 
-  fingerprint     String?  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

@@ -1,0 +1,19 @@
+{
+  "Dashboard": {
+    "title": "Panel de Control",
+    "subtitle": "Carmona Studio: Rendimiento y cumplimiento legal.",
+    "createBtn": "Crear Presupuesto",
+    "manageBtn": "Gestionar Clientes",
+    "revenue": "Facturación Bruta",
+    "vat": "IVA Acumulado",
+    "vatDesc": "Pendiente de liquidación trimestral",
+    "clients": "Cartera de Clientes",
+    "clientsDesc": "Activos en plataforma",
+    "scaleTitle": "Escala tu Agencia",
+    "scaleDesc": "Empieza creando tu primer presupuesto legal con trazabilidad SHA-256.",
+    "emitBtn": "Emitir Documento",
+    "newClientTitle": "¿Nuevo cliente?",
+    "newClientDesc": "Regístralo en segundos para automatizar sus datos fiscales.",
+    "goToCrm": "Ir al CRM de Clientes"
+  }
+}

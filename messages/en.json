@@ -1,0 +1,19 @@
+{
+  "Dashboard": {
+    "title": "Control Panel",
+    "subtitle": "Carmona Studio: Performance and legal compliance.",
+    "createBtn": "Create Quote",
+    "manageBtn": "Manage Clients",
+    "revenue": "Gross Revenue",
+    "vat": "Tax Collected (VAT)",
+    "vatDesc": "Pending quarterly settlement",
+    "clients": "Client Base",
+    "clientsDesc": "Active on platform",
+    "scaleTitle": "Scale Your Agency",
+    "scaleDesc": "Start by creating your first legal quote with SHA-256 traceability.",
+    "emitBtn": "Issue Document",
+    "newClientTitle": "New client?",
+    "newClientDesc": "Register them in seconds to automate their tax data.",
+    "goToCrm": "Go to Client CRM"
+  }
+}

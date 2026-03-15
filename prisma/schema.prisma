@@ -8,21 +8,80 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite" // Cambiado de postgresql a sqlite para desarrollo local
+  provider = "sqlite" // Desarrollo local con SQLite
   url      = env("DATABASE_URL")
 }
 
 // -----------------------------------------------------------------------------
-// 1. CONFIGURACIÓN DE LA AGENCIA / FREELANCE (El dueño de la app)
+// 1. SISTEMA DE IDENTIDAD (Auth.js Models)
+// -----------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Relación: Un usuario es dueño de una configuración de empresa
+  company       Company?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// -----------------------------------------------------------------------------
+// 2. CONFIGURACIÓN FISCAL (El emisor del presupuesto)
 // -----------------------------------------------------------------------------
 model Company {
   id            String   @id @default(cuid())
   name          String   // Razón Social
   nif           String   @unique // CIF/NIF validado
-  address       String   // Domicilio Fiscal (Obligatorio en facturas)
+  address       String   // Domicilio Fiscal
   email         String
   phone         String?
   
+  // Relación con Identidad: Cada empresa pertenece a un Usuario
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Relación: Una empresa emite muchos presupuestos
   budgets       Budget[]
   
@@ -31,17 +90,16 @@ model Company {
 }
 
 // -----------------------------------------------------------------------------
-// 2. MINI-CRM (Los clientes a los que se les emite el presupuesto)
+// 3. MINI-CRM (Los clientes)
 // -----------------------------------------------------------------------------
 model Client {
   id            String   @id @default(cuid())
-  name          String   // Nombre o Razón Social del cliente
-  nif           String   @unique // CIF/NIF
+  name          String   
+  nif           String   @unique 
   email         String
-  address       String   // Domicilio del cliente
+  address       String   
   phone         String?
   
-  // Relación: Un cliente tiene muchos presupuestos
   budgets       Budget[]
 
   createdAt     DateTime @default(now())
@@ -49,64 +107,48 @@ model Client {
 }
 
 // -----------------------------------------------------------------------------
-// 3. DOCUMENTO PRINCIPAL (Presupuesto / Factura Proforma)
+// 4. DOCUMENTACIÓN LEGAL (Presupuestos y Trazabilidad)
 // -----------------------------------------------------------------------------
 model Budget {
   id              String   @id @default(cuid())
-  series          String   @default("PRE") // Ej: PRE-2026
-  budgetNumber    Int      // Numeración secuencial (Ej: 1, 2, 3...)
+  series          String   @default("PRE") 
+  budgetNumber    Int      
   
-  // Claves foráneas (Relaciones)
   companyId       String
   clientId        String
   company         Company  @relation(fields: [companyId], references: [id])
   client          Client   @relation(fields: [clientId], references: [id])
 
-  // Desglose financiero
-  subtotal        Float    // Base imponible
-  taxAmount       Float    // Total de impuestos (IVA)
-  total           Float    // Total a pagar
+  subtotal        Float    
+  taxAmount       Float    
+  total           Float    
   
-  // Estado del documento
-  status          String   @default("DRAFT") // DRAFT, SENT, ACCEPTED, REJECTED
-  
-  // ---------------------------------------------------------
-  // CORE LEGAL ESPAÑA (Trazabilidad Ley Antifraude / Verifactu)
-  // ---------------------------------------------------------
-  issueDate       DateTime @default(now()) // Fecha de expedición
-  hash            String?  @unique // Huella digital del documento actual
-  previousHash    String?  // Huella del documento anterior (Encadenamiento)
-  isVerifactuSync Boolean  @default(false) // ¿Comunicado a Hacienda?
-  // ---------------------------------------------------------
+  status          String   @default("DRAFT") 
 
-  // Relación: Un presupuesto tiene muchas líneas de concepto
+  // CORE LEGAL ESPAÑA (Trazabilidad Verifactu)
+  issueDate       DateTime @default(now()) 
+  hash            String?  @unique 
+  previousHash    String?  
+  isVerifactuSync Boolean  @default(false) 
+
   lines           BudgetLine[]
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  // Evitar números duplicados en la misma serie (Ej: no pueden haber dos PRE-1)
   @@unique([series, budgetNumber])
 }
 
-// -----------------------------------------------------------------------------
-// 4. LÍNEAS DE CONCEPTO (El desglose interno del presupuesto)
-// -----------------------------------------------------------------------------
 model BudgetLine {
   id              String   @id @default(cuid())
-  
-  // Relación con el presupuesto padre
   budgetId        String
   budget          Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
 
-  // Datos de la línea
-  concept         String   // Ej: "Diseño de Landing Page"
+  concept         String   
   quantity        Float    @default(1)
-  unitPrice       Float    // Precio sin IVA
-  taxRate         Float    // Porcentaje de IVA aplicado (Ej: 21, 10, 4, 0)
-  
-  // Totales de la línea (calculados y guardados para evitar discrepancias futuras)
-  lineTotal       Float    // quantity * unitPrice
+  unitPrice       Float    
+  taxRate         Float    
+  lineTotal       Float    
   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

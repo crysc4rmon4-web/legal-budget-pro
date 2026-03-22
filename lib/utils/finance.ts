@@ -1,12 +1,13 @@
+
 /**
- * Carmona Studio - Finanzas y Cálculos Fiscales
- * Aquí vive la matemática que hace que la app valga dinero.
+ * Lógica de alta precisión financiera para LegalFlow.
+ * Todos los cálculos se realizan en céntimos para evitar errores de punto flotante.
  */
 
-export const calculateBudgetTotals = (lines: { quantity: number; unitPrice: number; taxRate: number }[]) => {
+export const calculateBudgetTotals = (lines: { quantity: number; unitPriceInCents: number; taxRate: number }[]) => {
   return lines.reduce((acc, line) => {
-    const base = line.quantity * line.unitPrice;
-    const tax = base * (line.taxRate / 100);
+    const base = Math.round(line.quantity * line.unitPriceInCents);
+    const tax = Math.round(base * (line.taxRate / 100));
     
     return {
       subtotal: acc.subtotal + base,
@@ -16,10 +17,9 @@ export const calculateBudgetTotals = (lines: { quantity: number; unitPrice: numb
   }, { subtotal: 0, totalTax: 0, total: 0 });
 };
 
-// Función para formatear moneda (español/inglés)
-export const formatCurrency = (amount: number, locale: string) => {
-  return new Intl.NumberFormat(locale === 'es' ? 'es-ES' : 'en-US', {
+export const formatCurrency = (cents: number, locale: string = 'es-ES') => {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'EUR',
-  }).format(amount);
+  }).format(cents / 100);
 };

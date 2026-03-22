@@ -1,8 +1,10 @@
-
 /**
- * Lógica de alta precisión financiera para LegalFlow.
+ * Lógica de alta precisión financiera.
  * Todos los cálculos se realizan en céntimos para evitar errores de punto flotante.
  */
+
+export const toCents = (amount: number): number => Math.round(amount * 100);
+export const fromCents = (cents: number): number => cents / 100;
 
 export const calculateBudgetTotals = (lines: { quantity: number; unitPriceInCents: number; taxRate: number }[]) => {
   return lines.reduce((acc, line) => {
@@ -21,5 +23,5 @@ export const formatCurrency = (cents: number, locale: string = 'es-ES') => {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'EUR',
-  }).format(cents / 100);
+  }).format(fromCents(cents));
 };

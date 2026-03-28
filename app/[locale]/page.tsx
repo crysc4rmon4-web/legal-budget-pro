@@ -1,10 +1,28 @@
 import { getClients } from "@/app/actions/client";
 import { getTranslations } from "next-intl/server";
 import { BarChart3, Users, FileText, TrendingUp, ArrowUpRight } from "lucide-react";
-import { Link } from "@/i18n/routing"; // Usamos el Link de next-intl
+import { Link } from "@/i18n/routing"; 
 import { Button } from "@/components/ui/button";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
 
 export default async function HomePage() {
+  const session = await auth();
+  
+  // Aquí está la magia: validamos específicamente el ID para calmar a TypeScript
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
+
+  const company = await prisma.company.findUnique({
+    where: { userId: session.user.id }
+  });
+
+  if (!company) {
+    redirect("/onboarding");
+  }
+
   const t = await getTranslations('Dashboard');
   const clients = await getClients();
   const totalClients = clients.length;
@@ -16,6 +34,9 @@ export default async function HomePage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tighter text-zinc-900">{t('title')}</h1>
           <p className="text-zinc-500 font-medium">{t('subtitle')}</p>
+          <p className="text-xs text-emerald-600 font-bold mt-1">
+            Perfil Activo: {company.name} ({company.sector})
+          </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <Link href="/presupuestos/nuevo">

@@ -1,89 +1,83 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { clientSchema, type ClientInput } from "@/lib/validations/budget";
-import { createClient } from "@/app/actions/client";
+import { clientSchema, ClientFormValues } from "@/lib/validations/client";
+import { createClient } from "@/app/actions/clients";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Plus, Loader2 } from "lucide-react";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { toast } from "sonner";
+import { ControllerRenderProps } from "react-hook-form";
 
-export default function AddClientForm() {
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<ClientInput>({
+export function AddClientForm() {
+  const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema),
+    defaultValues: {
+      name: "",
+      nif: "",
+      email: "",
+      address: "",
+      phone: "",
+    },
   });
 
-  const onSubmit = async (data: ClientInput) => {
-    setLoading(true);
-    const result = await createClient(data);
-    setLoading(false);
-
-    if (result.success) {
-      reset();
-      setOpen(false);
-    } else {
-      alert(result.error); // Luego lo cambiaremos por un Toast elegante
+  async function onSubmit(values: ClientFormValues) {
+    const toastId = toast.loading("Guardando cliente...");
+    try {
+      const result = await createClient(values);
+      if (result.success) {
+        toast.success("Cliente registrado con éxito", { id: toastId });
+        form.reset();
+      } else {
+        toast.error(result.error || "Error al guardar", { id: toastId });
+      }
+    } catch (error) {
+      toast.error("Error crítico de conexión", { id: toastId });
     }
-  };
+  }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-black hover:bg-zinc-800 text-white">
-          <Plus className="mr-2 h-4 w-4" /> Nuevo Cliente
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        {(["name", "nif", "email", "address"] as const).map((fieldName) => (
+          <FormField
+            key={fieldName}
+            control={form.control}
+            name={fieldName}
+            render={({ field }: { field: ControllerRenderProps<ClientFormValues, typeof fieldName> }) => (
+              <FormItem>
+                <FormLabel className="text-zinc-700 font-semibold capitalize">
+                  {fieldName === "name" ? "Nombre o Razón Social" : fieldName.toUpperCase()}
+                </FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    placeholder={`Introduce ${fieldName}...`} 
+                    className="bg-zinc-50 border-zinc-200 focus:ring-zinc-900"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ))}
+
+        <Button 
+          type="submit" 
+          disabled={form.formState.isSubmitting}
+          className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-bold py-6 rounded-xl transition-all shadow-lg"
+        >
+          {form.formState.isSubmitting ? "Procesando..." : "Confirmar Alta"}
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-white">
-        <DialogHeader>
-          <DialogTitle>Añadir Nuevo Cliente</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Nombre o Razón Social</Label>
-            <Input id="name" {...register("name")} placeholder="Ej. Juan Pérez SL" />
-            {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="nif">NIF / NIE / CIF</Label>
-            <Input id="nif" {...register("nif")} placeholder="B12345678" />
-            {errors.nif && <p className="text-xs text-red-500">{errors.nif.message}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" {...register("email")} placeholder="cliente@empresa.com" />
-            {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="address">Dirección Fiscal</Label>
-            <Input id="address" {...register("address")} placeholder="Calle Mayor 1, Madrid" />
-            {errors.address && <p className="text-xs text-red-500">{errors.address.message}</p>}
-          </div>
-
-          <Button type="submit" className="w-full bg-black" disabled={loading}>
-            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Guardar Cliente"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+      </form>
+    </Form>
   );
 }

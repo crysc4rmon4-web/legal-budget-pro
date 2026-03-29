@@ -1,50 +1,42 @@
-import { getMyClients } from "@/app/actions/clients"; // Usando alias @/
-import { AddClientForm } from "@/components/clients/AddClientForm"; // Usando alias @/
+import { getMyClients } from "@/app/actions/clients";
+import { AddClientForm } from "@/components/clients/AddClientForm"; // Corregido el nombre
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users } from "lucide-react";
+import { Users } from "lucide-react"; // Usamos Lucide para ser consistentes
 
 export default async function ClientesPage() {
   const clients = await getMyClients();
 
   return (
-    <div className="container mx-auto p-4 md:p-8 space-y-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Gestión de Clientes</h1>
-        <div className="flex items-center bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-          <Users className="w-4 h-4 text-blue-600 mr-2" />
-          <span className="text-blue-700 font-bold text-sm">{clients.length} Clientes</span>
+    <div className="container mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900">Gestión de Clientes</h1>
+          <p className="text-zinc-500">Administra tu cartera de clientes para facturación Veri*factu</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-4">
-          <Card className="shadow-lg border-zinc-200">
-            <CardHeader className="bg-zinc-900 text-white rounded-t-lg">
-              <CardTitle className="text-md">Añadir Nuevo</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <AddClientForm />
-            </CardContent>
-          </Card>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <Card className="lg:col-span-1 border-zinc-200 shadow-xl rounded-3xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Nuevo Cliente
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AddClientForm />
+          </CardContent>
+        </Card>
 
-        <div className="lg:col-span-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {clients.map((client) => (
-              <Card key={client.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <p className="font-bold text-zinc-900">{client.name}</p>
-                    <span className="text-[10px] font-mono bg-zinc-100 px-2 py-0.5 rounded text-zinc-500">
-                      {client.nif}
-                    </span>
-                  </div>
-                  <p className="text-xs text-zinc-500 mt-1 truncate">{client.email}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+        <Card className="lg:col-span-2 border-zinc-200 shadow-xl rounded-3xl">
+          <CardHeader>
+            <CardTitle>Listado de Clientes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Aquí irá la tabla de clientes que haremos luego */}
+            <p className="text-sm text-zinc-500 italic">Los clientes registrados aparecerán aquí.</p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

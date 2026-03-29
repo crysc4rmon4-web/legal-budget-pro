@@ -23,6 +23,7 @@ export default function LoginPage() {
             }}
           >
             <Button 
+              type="submit" 
               className="w-full bg-black text-white hover:bg-zinc-800 flex items-center justify-center gap-3 h-12 text-base font-bold transition-all"
             >
               <Github className="w-5 h-5" />

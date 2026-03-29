@@ -1,34 +1,41 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthConfig } from "next-auth"; // <-- Añade NextAuthConfig aquí
+import GitHub from "next-auth/providers/github";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
-import GitHub from "next-auth/providers/github";
 
-/**
- * CONFIGURACIÓN CENTRAL DE AUTENTICACIÓN - CARMONA STUDIO
- * Este archivo centraliza quién puede acceder a la app y cómo se vinculan
- * sus datos con el perfil de empresa (Company).
- */
-
-export const { handlers, auth, signIn, signOut } = NextAuth({
+// Añadimos : NextAuthConfig para que TypeScript sepa qué es
+const authConfig: NextAuthConfig = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID,
       clientSecret: process.env.AUTH_GITHUB_SECRET,
     }),
-    // Aquí podrías añadir Google, LinkedIn o Magic Links en el futuro
   ],
+  pages: {
+    signIn: "/login",
+  },
   callbacks: {
-    // Vinculamos el ID de la base de datos a la sesión del usuario
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
       }
       return session;
     },
+    authorized({ auth, request: { nextUrl } }) {
+      const isLoggedIn = !!auth?.user;
+      const isOnDashboard = nextUrl.pathname.startsWith("/");
+      const isOnLoginPage = nextUrl.pathname.includes("/login");
+
+      if (isOnDashboard) {
+        if (isLoggedIn) return true;
+        return false;
+      } else if (isLoggedIn && isOnLoginPage) {
+        return Response.redirect(new URL("/", nextUrl));
+      }
+      return true;
+    },
   },
-  // Redirecciones personalizadas para que la app se sienta fluida
-  pages: {
-    signIn: "/login", 
-  },
-});
+};
+
+export const { handlers, signIn, signOut, auth } = NextAuth(authConfig);

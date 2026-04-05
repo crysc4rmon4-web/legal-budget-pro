@@ -23,10 +23,12 @@ export default auth((req) => {
   const isLoginPage = nextUrl.pathname.includes('/login');
 
   // 4. Redirección inteligente (Sin usar arrays)
-  if (nextUrl.pathname === '/' || nextUrl.pathname === `/${locale}` || nextUrl.pathname === `/${locale}/`) {
-    const path = isLogged ? `/${locale}/dashboard` : `/${locale}/login`;
-    return NextResponse.redirect(new URL(path, nextUrl.origin));
-  }
+ if (nextUrl.pathname === '/' || nextUrl.pathname === `/${locale}` || nextUrl.pathname === `/${locale}/`) {
+  // SI ESTÁ LOGUEADO -> VA A LA RAÍZ (Donde tienes tu Dashboard)
+  // SI NO -> VA AL LOGIN
+  const path = isLogged ? `/${locale}` : `/${locale}/login`; 
+  return NextResponse.redirect(new URL(path, nextUrl.origin));
+}
 
   // 5. Proteger rutas privadas
   if (!isLogged && !isAuthApi && !isLoginPage) {

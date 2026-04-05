@@ -13,18 +13,17 @@ export async function upsertCompany(data: CompanySchema) {
       return { success: false, error: "No autorizado. Inicia sesión de nuevo." };
     }
 
-    // 2. Validación Blindada: Capturamos errores de Zod sin lanzar excepciones
- const validatedData = companySchema.safeParse(data);
+   // 2. Validación Blindada
+    const validatedData = companySchema.safeParse(data);
     
     if (!validatedData.success) {
-      // Extraemos el mensaje de forma ultra-segura para TS
-      const firstError = validatedData.error.format()._errors?. 
-        || validatedData.error.errors?.message 
-        || "Error de validación";
-        
+      // Usamos .flatten() que es el método más robusto de Zod para extraer mensajes
+      // Esto devuelve un objeto donde 'formErrors' es siempre un array de strings
+      const errorMessages = validatedData.error.flatten().formErrors;
+      
       return { 
         success: false, 
-        error: firstError 
+        error: errorMessages || "Error de validación en los campos" 
       };
     }
 

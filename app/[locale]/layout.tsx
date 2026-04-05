@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "../globals.css";
+import "@/app/globals.css"; // Ruta absoluta basada en tu tsconfig
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { notFound } from 'next/navigation';
 
-// Usamos la ruta real donde están tus archivos según tu mensaje
+// Componentes
 import Navbar from "@/components/Navbar"; 
 import Footer from "@/components/Footer";
 

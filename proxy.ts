@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 const intlMiddleware = createIntlMiddleware(routing);
 
 export default auth((req) => {
-  return intlMiddleware(req);
+  
   const { nextUrl } = req;
   const isLogged = !!req.auth;
   // @ts-ignore - Accedemos a la empresa si el adapter de Auth.js la incluye en la sesión

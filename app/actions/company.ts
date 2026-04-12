@@ -13,7 +13,7 @@ export async function upsertCompany(data: CompanySchema) {
       return { success: false, error: "No autorizado. Inicia sesión de nuevo." };
     }
 
-   // 2. Validación Blindada
+    // 2. Validación Blindada
     const validatedData = companySchema.safeParse(data);
     
     if (!validatedData.success) {
@@ -27,7 +27,7 @@ export async function upsertCompany(data: CompanySchema) {
       };
     }
 
-    // 3. Operación Atómica en DB
+    // 3. Operación Atómica en DB con trazabilidad
     const result = await prisma.company.upsert({
       where: { userId: session.user.id },
       update: {
@@ -39,7 +39,7 @@ export async function upsertCompany(data: CompanySchema) {
       },
     });
 
-    console.log(`✅ Empresa configurada: ${result.name} (Sector: ${result.sector})`);
+    console.log(`✅ Empresa configurada: ${result.name} (Sector: ${result.sector}, Régimen: ${result.regime})`);
 
     // 4. Refrescar caché de forma global para desbloquear el acceso a "/"
     revalidatePath("/", "layout");

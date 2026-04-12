@@ -55,6 +55,8 @@ model Company {
   
   // --- NUEVOS CAMPOS DE INTELIGENCIA FISCAL ---
   sector      String   @default("OTHER") 
+  regime      String   @default("GENERAL") // AÑADIR ESTE
+  taxNotes    String?                      // AÑADIR ESTE
   defaultVAT  Float    @default(21.0)
   defaultIRPF Float    @default(0.0)
   // --------------------------------------------
@@ -62,7 +64,7 @@ model Company {
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  clients     Client[] // RELACIÓN AÑADIDA: Una empresa tiene muchos clientes
+  clients     Client[] 
   budgets     Budget[]
   
   createdAt   DateTime @default(now())

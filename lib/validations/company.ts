@@ -12,13 +12,29 @@ export const companySchema = z.object({
   
   email: z.string().email("Email corporativo inválido."),
   
-  // Solución para Enum: Mensaje directo como segundo argumento
-  sector: z.enum(["CONSTRUCTION", "CONSULTING", "RETAIL", "HEALTH", "OTHER"], {
+  // Sectores ampliados con rigor legal
+  sector: z.enum([
+    "PROFESSIONAL", 
+    "CONSTRUCTION", 
+    "HEALTH", 
+    "EDUCATION", 
+    "RETAIL_RE", 
+    "AGRICULTURE", 
+    "OTHER"
+  ], {
     message: "Selecciona un sector de actividad válido."
   }),
+
+  // Régimen fiscal base para automatizar el cumplimiento
+  regime: z.enum([
+    "GENERAL", 
+    "EQUIVALENCE_SURCHARGE", 
+    "CASH_BASIS", 
+    "EXEMPT"
+  ], {
+    message: "Selecciona un régimen fiscal válido."
+  }),
   
-  // Solución para Numbers: Mensaje directo dentro de .number()
-  // Esto elimina el error 'invalid_type_error' al no usar el objeto de opciones
   defaultVAT: z
     .number({ message: "El IVA debe ser un número." })
     .min(0, "El IVA mínimo es 0")
@@ -28,6 +44,9 @@ export const companySchema = z.object({
     .number({ message: "El IRPF debe ser un número." })
     .min(0, "El IRPF mínimo es 0")
     .max(100, "El IRPF máximo es 100"),
+
+  // Campo clave para justificar alteraciones manuales de impuestos
+  taxNotes: z.string().optional(),
 });
 
 export type CompanySchema = z.infer<typeof companySchema>;

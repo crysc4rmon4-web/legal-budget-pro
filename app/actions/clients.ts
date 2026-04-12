@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { clientSchema, ClientFormValues } from "@/lib/validations/client";
 import { revalidatePath } from "next/cache";
 
+// Acción para crear
 export async function createClient(data: ClientFormValues) {
   try {
     const session = await auth();
@@ -18,12 +19,11 @@ export async function createClient(data: ClientFormValues) {
 
     if (!company) return { success: false, error: "Configura tu empresa primero" };
 
-    // Comprobar NIF duplicado SOLO para esta empresa
     const existing = await prisma.client.findFirst({
       where: { nif: validatedData.nif, companyId: company.id }
     });
 
-    if (existing) return { success: false, error: "Ya tienes un cliente con este NIF" };
+    if (existing) return { success: false, error: "Este NIF ya está en tu cartera" };
 
     await prisma.client.create({
       data: {
@@ -32,13 +32,15 @@ export async function createClient(data: ClientFormValues) {
       }
     });
 
-    revalidatePath("/[locale]/clientes"); 
+    revalidatePath("/[locale]/clientes");
     return { success: true };
   } catch (error) {
-    return { success: false, error: "Error al registrar cliente" };
+    console.error("CREATE_CLIENT_ERROR:", error);
+    return { success: false, error: "Error de validación fiscal" };
   }
 }
 
+// ESTA ES LA FUNCIÓN QUE TE FALTA Y ROMPE EL BUILD
 export async function getMyClients() {
   const session = await auth();
   if (!session?.user?.id) return [];

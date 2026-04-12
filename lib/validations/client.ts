@@ -1,13 +1,15 @@
 import * as z from "zod";
 
 export const clientSchema = z.object({
-  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  // Regex universal para España: NIF (DNI), NIE (Extranjeros) y CIF (Empresas)
-  // Acepta letras al principio o al final, mayúsculas o minúsculas.
-  nif: z.string().regex(/^[a-zA-Z0-9][0-9]{7}[a-zA-Z0-9]$/, "Formato de identificación incorrecto (NIF/CIF/NIE)"),
-  email: z.string().email("Correo electrónico no válido"),
-  address: z.string().min(5, "La dirección completa es obligatoria"),
+  name: z.string().min(2, "Mínimo 2 caracteres"),
+  nif: z.string().toUpperCase().min(9, "Formato incompleto").max(9, "Formato incorrecto"),
+  email: z.string().email("Email no válido"),
+  address: z.string().min(5, "Dirección obligatoria"),
   phone: z.string().optional().or(z.literal("")),
+  clientType: z.enum(["B2B", "B2C"]),
+  taxLocation: z.enum(["ESPAÑA", "CANARIAS", "UE", "EXTRA"]),
+  hasIRPF: z.boolean(), // Sin .optional() para que TypeScript no sufra
+  isReverseCharge: z.boolean(), // Sin .optional()
 });
 
 export type ClientFormValues = z.infer<typeof clientSchema>;

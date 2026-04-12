@@ -21,19 +21,20 @@ model User {
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([provider, providerAccountId])
 }
 
@@ -46,56 +47,63 @@ model Session {
 }
 
 model Company {
-  id          String   @id @default(cuid())
-  name        String
-  nif         String   @unique
-  address     String
-  email       String
-  phone       String?
-  
+  id      String  @id @default(cuid())
+  name    String
+  nif     String  @unique
+  address String
+  email   String
+  phone   String?
+
   // --- NUEVOS CAMPOS DE INTELIGENCIA FISCAL ---
-  sector      String   @default("OTHER") 
-  regime      String   @default("GENERAL") // AÑADIR ESTE
-  taxNotes    String?                      // AÑADIR ESTE
-  defaultVAT  Float    @default(21.0)
-  defaultIRPF Float    @default(0.0)
+  sector      String  @default("OTHER")
+  regime      String  @default("GENERAL") // AÑADIR ESTE
+  taxNotes    String? // AÑADIR ESTE
+  defaultVAT  Float   @default(21.0)
+  defaultIRPF Float   @default(0.0)
   // --------------------------------------------
 
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  clients     Client[] 
-  budgets     Budget[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  clients Client[]
+  budgets Budget[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Client {
-  id        String   @id @default(cuid())
-  name      String
-  nif       String   // Quitamos @unique global para evitar conflictos entre usuarios
-  email     String
-  address   String
-  phone     String?
-  
-  // RELACIÓN CON EMPRESA: El cliente pertenece a una empresa específica
+  id      String  @id @default(cuid())
+  name    String
+  nif     String
+  email   String
+  address String
+  phone   String?
+
+  // --- CAMPOS FISCALES ---
+  clientType      String  @default("B2B")
+  taxLocation     String  @default("ESPAÑA")
+  hasIRPF         Boolean @default(false)
+  isReverseCharge Boolean @default(false)
+
+  // --- RELACIONES ---
   companyId String
-  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  
-  budgets   Budget[]
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // 🔥 ESTA ES LA LÍNEA QUE FALTA Y QUE ARREGLA EL ERROR 🔥
+  budgets Budget[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Un NIF solo puede estar una vez por empresa
-  @@unique([nif, companyId]) 
+  @@unique([nif, companyId])
 }
 
 model Budget {
-  id               String   @id @default(cuid())
-  series           String   @default("PRE") 
-  budgetNumber     Int
-  
+  id           String @id @default(cuid())
+  series       String @default("PRE")
+  budgetNumber Int
+
   // SNAPSHOTS (Blindaje Legal Veri*factu)
   issuerNameSnapshot    String
   issuerNifSnapshot     String
@@ -104,24 +112,24 @@ model Budget {
   clientNifSnapshot     String
   clientAddressSnapshot String
 
-  companyId        String
-  clientId         String
-  company          Company  @relation(fields: [companyId], references: [id])
-  client           Client   @relation(fields: [clientId], references: [id])
+  companyId String
+  clientId  String
+  company   Company @relation(fields: [companyId], references: [id])
+  client    Client  @relation(fields: [clientId], references: [id])
 
-  subtotal         Int      
-  taxAmount        Int      
-  total            Int      
-  
-  status           String   @default("DRAFT") 
-  issueDate        DateTime @default(now())
-  hash             String?  @unique 
-  previousHash     String? 
-  isVerifactuSync  Boolean  @default(false) 
+  subtotal  Int
+  taxAmount Int
+  total     Int
 
-  lines            BudgetLine[]
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  status          String   @default("DRAFT")
+  issueDate       DateTime @default(now())
+  hash            String?  @unique
+  previousHash    String?
+  isVerifactuSync Boolean  @default(false)
+
+  lines     BudgetLine[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   @@unique([series, budgetNumber])
 }
@@ -133,7 +141,7 @@ model BudgetLine {
   concept          String
   quantity         Float    @default(1)
   unitPriceInCents Int
-  taxRate          Float    
+  taxRate          Float
   lineTotalInCents Int
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt

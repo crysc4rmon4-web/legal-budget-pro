@@ -64,11 +64,11 @@ export function AddClientForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 md:space-y-8">
-        
+
         {/* BLOQUE 1: IDENTIDAD LEGAL */}
         <div className="bg-zinc-50 p-5 md:p-6 rounded-[2rem] border border-zinc-200 shadow-sm transition-all">
           <p className="text-[10px] font-black uppercase text-zinc-400 flex items-center gap-2 mb-4">
-            <ShieldCheck className="w-3 h-3"/> Identidad Legal
+            <ShieldCheck className="w-3 h-3" /> Identidad Legal
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
             <FormField control={form.control} name="name" render={({ field }) => (
@@ -94,7 +94,7 @@ export function AddClientForm() {
         {/* BLOQUE 2: CONTACTO Y LOCALIZACIÓN */}
         <div className="bg-white p-5 md:p-6 rounded-[2rem] border border-zinc-100 shadow-sm transition-all">
           <p className="text-[10px] font-black uppercase text-zinc-400 flex items-center gap-2 mb-4">
-            <Contact2 className="w-3 h-3"/> Datos de Contacto
+            <Contact2 className="w-3 h-3" /> Datos de Contacto
           </p>
           <div className="space-y-4 md:space-y-5">
             <FormField control={form.control} name="email" render={({ field }) => (
@@ -126,9 +126,9 @@ export function AddClientForm() {
         {/* BLOQUE 3: INTELIGENCIA FISCAL */}
         <div className="bg-zinc-50 p-5 md:p-6 rounded-[2rem] border border-zinc-200 shadow-sm space-y-5 transition-all">
           <p className="text-[10px] font-black uppercase text-zinc-400 flex items-center gap-2">
-            <Globe2 className="w-3 h-3"/> Configuración Tributaria
+            <Globe2 className="w-3 h-3" /> Configuración Tributaria
           </p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
             <FormField control={form.control} name="clientType" render={({ field }) => (
               <FormItem>
@@ -166,13 +166,13 @@ export function AddClientForm() {
                 <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mb-1">IVA Automático</p>
                 <div className="text-3xl font-black tracking-tighter">{fiscal.iva}</div>
               </div>
-              
+
               <div className="bg-white/10 p-3 rounded-xl flex items-center gap-3 w-full md:w-auto">
                 <FormField control={form.control} name="hasIRPF" render={({ field }) => (
                   <FormItem className="flex items-center gap-3 space-y-0">
                     <FormControl>
-                      <Switch 
-                        checked={field.value} 
+                      <Switch
+                        checked={field.value}
                         onCheckedChange={field.onChange}
                         className="data-[state=checked]:bg-green-500"
                       />
@@ -184,15 +184,20 @@ export function AddClientForm() {
                 )} />
               </div>
             </div>
-            
+
             <div className="mt-4 pt-4 border-t border-white/10">
               <span className="text-[11px] text-zinc-400 font-medium">{fiscal.nota}</span>
             </div>
           </div>
         </div>
 
-        <Button type="submit" className="w-full h-14 bg-zinc-900 hover:bg-black text-white rounded-[1rem] font-black text-base shadow-xl transition-all active:scale-[0.98]">
-          Confirmar y Guardar Cliente
+        <Button
+          type="submit"
+          className="w-full h-14 bg-zinc-900 hover:bg-black text-white rounded-[1.2rem] font-black text-sm md:text-base shadow-xl transition-all active:scale-[0.98] px-4"
+        >
+          <span className="truncate w-full inline-block">
+            Confirmar y Guardar Cliente
+          </span>
         </Button>
       </form>
     </Form>
